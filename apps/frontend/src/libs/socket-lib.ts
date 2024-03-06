@@ -1,6 +1,6 @@
 import io from 'socket.io-client';
 
-const socket = io();
+const socket = io("http://localhost:4000");
 
 socket.on('connect', () => {
     console.log('Connected to server');
@@ -15,6 +15,7 @@ export default class AudioStreamerSocket {
     constructor() { }
 
     bindEvents() {
+        this.stop(false);
         socket.on('stream-data', this.onData);
         socket.on('stream-error', this.onError);
         socket.on('stream-started', this.onStart);
@@ -34,9 +35,10 @@ export default class AudioStreamerSocket {
         socket.emit(event, data);
     }
 
-    stop() {
-        socket.emit('stop-stream');
-        socket.off('stream-data');
-        socket.off('stream-error');
+    stop(emit = true) {
+        if(emit) socket.emit('stop-stream');
+        socket.off('stream-data', this.onData);
+        socket.off('stream-error', this.onError);
+        socket.off('stream-started', this.onStart);
     }
 }

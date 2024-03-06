@@ -6,23 +6,20 @@ import fs from 'fs';
 const port = process.env.PORT || 4000;
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {cors:{origin:'*'}});
 
-app.use(express.static('public'));
-
-app.get('/', (req, res) => {
-    res.render('index.html');
-});
+var dir = __dirname + '/audios';
+if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, );
+}
 
 const streams: Record<string, fs.WriteStream> = {};
-
 
 io.on('connection', (socket) => {
     console.log('a user connected');
     socket.on('start-stream', () => {
         console.log('start-stream');
-
-        streams[socket.id] = fs.createWriteStream(`./audio-${Math.ceil(Math.random() * 100)}.webm`);
+        streams[socket.id] = fs.createWriteStream(`./audios/audio-${Math.ceil(Math.random() * 100)}.webm`);
         socket.emit('stream-started');
     })
     socket.on('stream-data', async (chunk) => {

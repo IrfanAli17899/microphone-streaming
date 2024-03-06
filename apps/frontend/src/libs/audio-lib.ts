@@ -22,6 +22,7 @@ export default class AudioStreamer {
 
     async start() {
         try {
+            if(this.recorder) await this.stop();
             this.globalStream = await navigator.mediaDevices.getUserMedia(this.constraints);
             this.recorder = new MediaRecorder(this.globalStream, { mimeType: 'audio/webm' });
             this.recorder.addEventListener('dataavailable', this.dataAvailableHandler);
