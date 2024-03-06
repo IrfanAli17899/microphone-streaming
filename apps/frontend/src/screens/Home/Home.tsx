@@ -1,7 +1,8 @@
 "use client";
 
 import AudioStreamer from "@src/libs/audio-lib";
-import AudioStreamerSocket from "@src/libs/socket-lib";
+import AudioStreamerSocket from "@src/libs/audio-socket-lib";
+import socket from "@src/libs/socket-lib";
 import React, { useEffect, useRef, useState } from "react";
 
 export default function Home() {
@@ -19,7 +20,7 @@ export default function Home() {
 
   function start() {
     microphone.current = new AudioStreamer();
-    audioSocket.current = new AudioStreamerSocket();
+    audioSocket.current = new AudioStreamerSocket(socket);
 
     microphone.current.onData = (chunk) => {
       audioSocket.current?.send("stream-data", chunk);
@@ -28,26 +29,25 @@ export default function Home() {
       console.log("Microphone closed");
     };
 
-    // microphone.current.onError = (error) => {
-    //   console.error("Microphone error:", error);
-    //   audioSocket.current?.stop();
-    //   microphone.current?.stop();
-    // };
+    microphone.current.onError = (error) => {
+      console.error("Microphone error:", error);
+      toggleIsPlaying(false);
+    };
 
     audioSocket.current.onStart = () => {
       console.log("started-streaming");
-      setIsPlaying(true);
       microphone.current?.start();
     };
 
-    // audioSocket.current.onData = (data) => {
-    //   console.log("Data from server:", data);
-    // };
-    // audioSocket.current.onError = (error) => {
-    //   microphone.current?.stop();
-    //   // audioSocket.stop();
-    //   console.error("Error from server:", error);
-    // };
+    audioSocket.current.onData = (data) => {
+      console.log("Data from server:", data);
+    };
+
+    audioSocket.current.onError = (error) => {
+      console.error("Error from server:", error);
+      toggleIsPlaying(false);
+    };
+
     audioSocket.current.start();
   }
 
@@ -56,17 +56,16 @@ export default function Home() {
     audioSocket.current?.stop();
     microphone.current = null;
     audioSocket.current = null;
-    setIsPlaying(false);
   }
 
-  const toggleIsPlaying = () => {
-    setIsPlaying((_prev) => !_prev);
+  const toggleIsPlaying = (bool?: boolean) => {
+    setIsPlaying((_prev) => bool ?? !_prev);
   }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <h1>Home</h1>
-      <button onClick={toggleIsPlaying}>
+      <h1>Realtime Audio Streaming to Backend</h1>
+      <button onClick={() => toggleIsPlaying()}>
         {isPlaying ? "Stop" : "Start"}
       </button>
     </main>
