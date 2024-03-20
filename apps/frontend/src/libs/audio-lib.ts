@@ -6,13 +6,18 @@ export default class AudioStreamer {
     onClose = () => { };
     onError = (_error: unknown) => { };
 
+    timeSlice: number | undefined = undefined;
+
     //audioStream constraints
-    constraints = {
+    constraints: MediaStreamConstraints = {
         audio: true,
         video: false
     };
 
-    constructor() { }
+    constructor(constraints: MediaStreamConstraints, timeSlice?: number) {
+        this.constraints = constraints;
+        this.timeSlice = timeSlice;
+    }
 
     dataAvailableHandler = (e: BlobEvent) => {
         if (e.data.size > 0) {
@@ -22,11 +27,11 @@ export default class AudioStreamer {
 
     async start() {
         try {
-            if(this.recorder) await this.stop();
+            if (this.recorder) await this.stop();
             this.globalStream = await navigator.mediaDevices.getUserMedia(this.constraints);
-            this.recorder = new MediaRecorder(this.globalStream, { mimeType: 'audio/webm' });
+            this.recorder = new MediaRecorder(this.globalStream);
             this.recorder.addEventListener('dataavailable', this.dataAvailableHandler);
-            this.recorder.start(1000);
+            this.recorder.start(this.timeSlice);
         } catch (error) {
             this.onError(error);
         }

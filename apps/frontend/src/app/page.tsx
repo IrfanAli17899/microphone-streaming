@@ -1,7 +1,10 @@
-import Home from "@src/screens/Home/Home";
-import Image from "next/image";
+import dynamic from "next/dynamic";
 
-export default function HomePage() {
+const Home = dynamic(() => import("@src/screens/Home/Home"), {
+  ssr: false,
+});
+
+export default async function HomePage() {
   return (
    <Home />
   );

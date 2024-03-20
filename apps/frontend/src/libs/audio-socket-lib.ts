@@ -17,14 +17,9 @@ export default class AudioStreamerSocket {
         this.socket.on('stream-started', this.onStart);
     };
 
-    start() {
+    start(config?: {  }) {
         this.bindEvents();
-        this.socket.emit('start-stream', {
-            encoding: 'LINEAR16',
-            sampleRateHertz: 16000,
-            languageCode: 'en-US',
-            interimResults: true
-        });
+        this.socket.emit('start-stream', config);
     }
     send(event: string, data: unknown) {
         this.socket.emit(event, data);
